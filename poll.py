@@ -93,6 +93,18 @@ def main():
             state[state_key]=visual_key
             sha=save_state(state,sha)
             print(f"Backup visual wakeup forwarded: {visual_key}",flush=True)
+    # Recover missing SHORTS workflow schedules. Public polling costs no
+    # private minutes while idle; exactly one wakeup per daily slot.
+    # Production's MySQL one-shot and daily cap block duplicate uploads.
+    for short_slot,hour,minute in ((1,8,45),(2,15,45),(3,20,45)):
+        clock=now.hour*60+now.minute
+        due=hour*60+minute
+        slot_key=f"{now:%Y%m%d}-slot-{short_slot}"
+        if due<=clock<due+25 and state.get("last_short_backup")!=slot_key:
+            dispatch("femi-short-backup",{"slot":str(short_slot),"slot_key":slot_key})
+            state["last_short_backup"]=slot_key
+            sha=save_state(state,sha)
+            print(f"Backup Shorts wakeup forwarded: {slot_key}",flush=True)
     # Long dispatcher checks four times daily; long visual prep has its own schedule.
     window=f"{now:%Y%m%d}-{now.hour//6}"
     if state.get("last_long_check")!=window:
