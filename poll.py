@@ -56,6 +56,10 @@ def fetch_updates(offset):
 def main():
     state,sha=load_state()
     offset=int(state.get("offset",0))
+    webhook=SESSION.post(f"https://api.telegram.org/bot{TOKEN}/deleteWebhook",json={"drop_pending_updates":False},timeout=20)
+    webhook.raise_for_status()
+    if not webhook.json().get("ok"):
+        raise RuntimeError("Failed to disable Telegram webhook without dropping pending updates")
     updates=fetch_updates(offset)
     for update in updates:
         uid=int(update["update_id"])
