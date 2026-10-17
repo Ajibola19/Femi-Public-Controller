@@ -80,6 +80,19 @@ def main():
             state["last_short_slot"]=key
             sha=save_state(state,sha)
             print(f"Short prompt heartbeat: {key}",flush=True)
+    # GitHub scheduled workflows are best-effort. Send one backup wake-up
+    # during each visual window; the private worker's MySQL window claim
+    # prevents reprocessing if the normal visual schedule already ran.
+    for visual_window,hour,minute in (("morning",6,25),("night",22,25)):
+        minutes_now=now.hour*60+now.minute
+        start=hour*60+minute
+        visual_key=f"{now:%Y%m%d}-{visual_window}"
+        state_key=f"last_visual_backup_{visual_window}"
+        if start<=minutes_now<start+25 and state.get(state_key)!=visual_key:
+            dispatch("femi-visual-backup",{"window":visual_window,"day":f"{now:%Y%m%d}"})
+            state[state_key]=visual_key
+            sha=save_state(state,sha)
+            print(f"Backup visual wakeup forwarded: {visual_key}",flush=True)
     # Long dispatcher checks four times daily; long visual prep has its own schedule.
     window=f"{now:%Y%m%d}-{now.hour//6}"
     if state.get("last_long_check")!=window:
