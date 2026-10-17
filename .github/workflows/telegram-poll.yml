@@ -1,8 +1,5 @@
 name: FEMI lightweight Telegram polling
 on:
-  push:
-    paths:
-      - '.femi-public-poll-smoke'
   schedule:
     - cron: '*/5 * * * *'
   workflow_dispatch:
