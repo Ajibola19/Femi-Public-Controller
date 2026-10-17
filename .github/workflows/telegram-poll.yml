@@ -1,8 +1,5 @@
 name: FEMI lightweight Telegram polling
 on:
-  push:
-    paths:
-      - '.femi-intake-check'
   schedule:
     - cron: '2-59/5 * * * *'
   workflow_dispatch:
