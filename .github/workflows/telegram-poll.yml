@@ -10,7 +10,6 @@ concurrency:
   cancel-in-progress: false
 jobs:
   poll:
-    if: ${{ vars.FEMI_PUBLIC_ACTIVE == 'true' }}
     runs-on: ubuntu-latest
     timeout-minutes: 3
     env:
